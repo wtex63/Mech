@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE rules SYSTEM "rules.dtd">
+<!--
+  ============================================================
+  Fusion 360 Electronics / Eagle Design Rules
+  Profile : Snapmaker A350 CNC-Optimized
+            0.5 oz Copper · 0.032 in FR-4/G10
+  Revision: 2.1   Date: May 2026   Author: William
+  ============================================================
+  MACHINE SPECIFICATIONS - Snapmaker A350
+  Type           : 3-in-1 (CNC Mill / Laser / 3D Print)
+  CNC Work Area  : 320 x 350 x 45 mm
+  Spindle        : 50W, 12,000 RPM maximum
+  Laser          : 1600mW, resolution 0.15 mm
+  Positional Acc : +/-0.05 mm (linear modules, lead screws)
+                   X/Y lead: 20 mm | Z lead: 8 mm
+  Software       : Snapmaker Luban
+  Drills         : 0.1 mm - 1.0 mm CNC + standard carbide set
+
+  NOTE - Two sub-profiles encoded here:
+    A) ETCH MODE (laser LDI + chemical etch) -- ACTIVE
+       msWidth / md* clearances = 0.2032 mm (0.008 in)
+    B) CNC MILL MODE (isolation routing, no chemistry):
+       Change msWidth and all md* params to 0.1524mm
+
+  HOW TO IMPORT
+  1. In Fusion 360 Electronics, open your board (.brd).
+  2. Menu: Edit > Design Rules
+  3. Click "Load..." and select this file.
+  4. Click "Apply" then "Run DRC".
+  ============================================================
+
+  KEY CHANGES vs. HAND-DRILL PROFILE (v1.1)
+  ------------------------------------------
+  Min Drill      : 0.787 mm -> 0.300 mm  (-62%)
+  Pref Drill     : 0.787 mm -> 0.400 mm
+  Via Pad OD     : 1.397 mm -> 0.700 mm  (-50%)
+  Annular Ring   : 0.305 mm -> 0.150 mm  (-51%) per side
+  Cu-to-Edge     : 0.508 mm -> 0.381 mm  (-25%)
+  Min Trace      : 0.305 mm -> 0.203 mm  (-33%) etch mode
+  Min Trace CNC  : 0.305 mm -> 0.152 mm  (-50%) mill mode
+  Min Clearance  : 0.305 mm -> 0.203 mm  (-33%)
+  ============================================================
+-->
+<rules version="6">
+
+  <description language="en">
+Snapmaker A350 CNC-Optimized - 0.5 oz Copper - FR-4/G10 0.032 in  Rev 2.1
+Board Material  : FR-4 / G10
+Board Thickness : 0.032 in (0.813 mm)
+Copper Weight   : 0.5 oz / ft2
+Machine         : Snapmaker A350 (320x350x45mm CNC, 50W 12000RPM)
+Positional Acc  : +/-0.05 mm (X/Y 20mm lead, Z 8mm lead)
+Software        : Snapmaker Luban
+
+ACTIVE MODE: ETCH (laser LDI + chemical etch)
+To switch to CNC MILL mode: change msWidth and all md*
+clearance params from 0.2032mm to 0.1524mm
+
+--- ROUTING (ETCH MODE active) ---
+Min Trace Width    : 0.008 in (0.203 mm)   [Mill: 0.006 in / 0.152 mm]
+Pref Trace Width   : 0.012 in (0.305 mm)
+Min Clearance      : 0.008 in (0.203 mm)
+Cu-to-Board-Edge   : 0.015 in (0.381 mm)
+
+--- HOLES ---
+Min Drill Dia      : 0.012 in (0.300 mm)   practical CNC floor in FR-4
+Pref Via Drill     : 0.016 in (0.400 mm)
+Via Pad OD         : 0.028 in (0.700 mm)   ratio = 1.75x
+Min Annular Ring   : 0.006 in (0.150 mm)   per side
+
+--- SOLDER MASK ---
+Mask Expansion     : 0.004 in (0.102 mm)
+Min Mask Sliver    : 0.008 in (0.203 mm)
+Via Tenting        : Off (all vias open)
+
+--- THERMAL RELIEF ---
+Spoke Width        : 0.016 in (0.406 mm)
+Thermal Clearance  : 0.014 in (0.356 mm)
+Thermals for Vias  : Off
+  </description>
+
+  <!-- CLEARANCES  ETCH=0.2032mm | CNC MILL: change to 0.1524mm -->
+  <param name="mdWireWire"         value="0.2032mm"/>
+  <param name="mdWirePad"          value="0.2032mm"/>
+  <param name="mdWireVia"          value="0.2032mm"/>
+  <param name="mdPadPad"           value="0.2032mm"/>
+  <param name="mdPadVia"           value="0.2032mm"/>
+  <param name="mdViaVia"           value="0.2032mm"/>
+  <param name="mdSmdPad"           value="0.2032mm"/>
+  <param name="mdSmdVia"           value="0.2032mm"/>
+  <param name="mdSmdSmd"           value="0.2032mm"/>
+
+  <!-- COPPER-TO-EDGE  0.015 in = 0.381 mm -->
+  <!-- Snapmaker A350: +/-0.05mm CNC accuracy -->
+  <param name="mdWireBoard"        value="0.381mm"/>
+  <param name="mdPadBoard"         value="0.381mm"/>
+  <param name="mdViaBoard"         value="0.381mm"/>
+  <param name="mdSmdBoard"         value="0.381mm"/>
+
+  <!-- MINIMUM FEATURE SIZES -->
+  <!-- ETCH MODE: 0.008 in = 0.2032 mm -->
+  <!-- CNC MILL MODE: change to 0.1524mm -->
+  <param name="msWidth"            value="0.2032mm"/>
+  <!-- Min drill 0.012 in = 0.300 mm  -->
+  <!-- A350 can drill 0.1mm but 0.3mm min recommended for FR-4 -->
+  <param name="msDrill"            value="0.3000mm"/>
+  <param name="msMicroVia"         value="0.3000mm"/>
+
+  <!-- PREFERRED ROUTING WIDTHS  0.012 in = 0.3048 mm -->
+  <param name="psTop"              value="0.3048mm"/>
+  <param name="psBottom"           value="0.3048mm"/>
+  <param name="psInner1"           value="0.3048mm"/>
+  <param name="psInner2"           value="0.3048mm"/>
+  <param name="psSizes"            value="0.3048mm 0.4064mm 0.6096mm 0.8128mm"/>
+  <param name="psDrill"            value="0.4000mm"/>
+
+  <!-- VIA/PAD RATIOS  OD=0.700mm / drill=0.400mm = 1.75 -->
+  <!-- Annular = (0.700-0.400)/2 = 0.150mm per side = 0.006 in -->
+  <!-- Snapmaker A350 +/-0.05mm allows 3x tighter than hand-drill -->
+  <param name="rvPadTop"           value="1.7500"/>
+  <param name="rvPadInner"         value="1.7500"/>
+  <param name="rvPadBottom"        value="1.7500"/>
+  <param name="rvViaOuter"         value="1.7500"/>
+  <param name="rvViaInner"         value="1.7500"/>
+  <param name="rvSmallVias"        value="1.7500"/>
+
+  <!-- SOLDER MASK  expansion 0.004 in = 0.1016 mm -->
+  <param name="mlMinStopFrame"     value="0.1016mm"/>
+  <param name="mlMaxStopFrame"     value="0.1016mm"/>
+  <param name="mlMinCreamFrame"    value="0.0mm"/>
+  <param name="mlMaxCreamFrame"    value="0.0mm"/>
+  <param name="mlMinIsolate"       value="0.2032mm"/>
+  <param name="mlViaStopLimit"     value="0.0mm"/>
+  <param name="mvStopFrame"        value="0.1016mm"/>
+  <param name="mvCreamFrame"       value="0.0mm"/>
+
+  <!-- THERMAL RELIEF  clearance 0.014 in = 0.3556 mm -->
+  <param name="slThermalIsolate"   value="0.3556mm"/>
+  <param name="psIsolate"          value="0.2032mm"/>
+  <param name="slThermalsForVias"  value="no"/>
+  <param name="srMinRoundness"     value="0%"/>
+  <param name="srMaxRoundness"     value="0%"/>
+  <param name="srRoundness"        value="0%"/>
+
+</rules>

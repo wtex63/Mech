@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE rules SYSTEM "rules.dtd">
+<!--
+  ============================================================
+  Fusion 360 Electronics / Eagle Design Rules
+  Profile : Hand-Etch · 0.5 oz Copper · 0.032 in FR-4/G10
+  Revision: 1.1   Date: May 2026   Author: William
+  ============================================================
+  MACHINE: N/A (hand drill / standard drill press)
+  See home_etch_CNC_rules.dru for Snapmaker A350 CNC profile.
+
+  HOW TO IMPORT
+  1. In Fusion 360 Electronics, open your board (.brd).
+  2. Menu: Edit > Design Rules
+  3. Click "Load..." and select this file.
+  4. Click "Apply" then "Run DRC".
+  ============================================================
+-->
+<rules version="6">
+
+  <description language="en">
+Hand-Etch 0.5 oz Copper - FR-4/G10 0.032 in  Rev 1.1
+Board Material  : FR-4 / G10
+Board Thickness : 0.032 in (0.813 mm)
+Copper Weight   : 0.5 oz / ft2
+Machine         : Hand drill / standard drill press
+
+--- ROUTING ---
+Min Trace Width    : 0.012 in (0.305 mm)
+Pref Trace Width   : 0.016 in (0.406 mm)
+Min Clearance      : 0.012 in (0.305 mm)
+Cu-to-Board-Edge   : 0.020 in (0.508 mm)
+
+--- HOLES ---
+Min Drill Dia      : 0.031 in (0.787 mm)
+Via Pad OD         : 0.055 in (1.397 mm)   ratio 1.774x
+Min Annular Ring   : 0.012 in (0.305 mm) per side
+
+--- SOLDER MASK ---
+Mask Expansion     : 0.004 in (0.102 mm)
+Min Mask Sliver    : 0.008 in (0.203 mm)
+Via Tenting        : Off (all vias open)
+
+--- THERMAL RELIEF ---
+Spoke Width        : 0.016 in (0.406 mm)
+Thermal Clearance  : 0.014 in (0.356 mm)
+Thermals for Vias  : Off
+  </description>
+
+  <!-- CLEARANCES  0.012 in = 0.3048 mm -->
+  <param name="mdWireWire"         value="0.3048mm"/>
+  <param name="mdWirePad"          value="0.3048mm"/>
+  <param name="mdWireVia"          value="0.3048mm"/>
+  <param name="mdPadPad"           value="0.3048mm"/>
+  <param name="mdPadVia"           value="0.3048mm"/>
+  <param name="mdViaVia"           value="0.3048mm"/>
+  <param name="mdSmdPad"           value="0.3048mm"/>
+  <param name="mdSmdVia"           value="0.3048mm"/>
+  <param name="mdSmdSmd"           value="0.3048mm"/>
+
+  <!-- COPPER-TO-EDGE  0.020 in = 0.508 mm -->
+  <param name="mdWireBoard"        value="0.508mm"/>
+  <param name="mdPadBoard"         value="0.508mm"/>
+  <param name="mdViaBoard"         value="0.508mm"/>
+  <param name="mdSmdBoard"         value="0.508mm"/>
+
+  <!-- MINIMUM FEATURE SIZES -->
+  <param name="msWidth"            value="0.3048mm"/>
+  <param name="msDrill"            value="0.7874mm"/>
+  <param name="msMicroVia"         value="0.7874mm"/>
+
+  <!-- PREFERRED ROUTING WIDTHS  0.016 in = 0.4064 mm -->
+  <param name="psTop"              value="0.4064mm"/>
+  <param name="psBottom"           value="0.4064mm"/>
+  <param name="psInner1"           value="0.4064mm"/>
+  <param name="psInner2"           value="0.4064mm"/>
+  <param name="psSizes"            value="0.4064mm 0.6096mm 0.8128mm"/>
+  <param name="psDrill"            value="0.7874mm"/>
+
+  <!-- VIA/PAD RATIOS  OD=1.397mm / drill=0.787mm = 1.7742 -->
+  <param name="rvPadTop"           value="1.7742"/>
+  <param name="rvPadInner"         value="1.7742"/>
+  <param name="rvPadBottom"        value="1.7742"/>
+  <param name="rvViaOuter"         value="1.7742"/>
+  <param name="rvViaInner"         value="1.7742"/>
+  <param name="rvSmallVias"        value="1.7742"/>
+
+  <!-- SOLDER MASK -->
+  <param name="mlMinStopFrame"     value="0.1016mm"/>
+  <param name="mlMaxStopFrame"     value="0.1016mm"/>
+  <param name="mlMinCreamFrame"    value="0.0mm"/>
+  <param name="mlMaxCreamFrame"    value="0.0mm"/>
+  <param name="mlMinIsolate"       value="0.2032mm"/>
+  <param name="mlViaStopLimit"     value="0.0mm"/>
+  <param name="mvStopFrame"        value="0.1016mm"/>
+  <param name="mvCreamFrame"       value="0.0mm"/>
+
+  <!-- THERMAL RELIEF -->
+  <param name="slThermalIsolate"   value="0.3556mm"/>
+  <param name="psIsolate"          value="0.3048mm"/>
+  <param name="slThermalsForVias"  value="no"/>
+  <param name="srMinRoundness"     value="0%"/>
+  <param name="srMaxRoundness"     value="0%"/>
+  <param name="srRoundness"        value="0%"/>
+
+</rules>

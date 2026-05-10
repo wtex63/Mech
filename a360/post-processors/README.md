@@ -17,3 +17,7 @@ Use machine and controller identifiers in file names:
 Example:
 
 haas-vf2-fanuc-v1.cps
+
+Snapmaker A350 example:
+
+snapmaker-a350-generic-grbl-v1.cps
