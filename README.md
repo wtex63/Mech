@@ -24,10 +24,10 @@ a360/
 - scripts/: Source code for Fusion scripts and add-ins
 - post-processors/: CAM post files and related notes
 - machines/snapmaker-a350/: Process-specific setup notes for your Snapmaker A350
-- machines/snapmaker-a350/design-rules/: Shared .dru files for A350 workflows
-- machines/snapmaker-a350/cnc/design-rules/: CNC-focused .dru files
-- machines/snapmaker-a350/laser/design-rules/: Laser-focused .dru files
-- machines/snapmaker-a350/print-3d/design-rules/: 3D print-focused .dru files
+- machines/snapmaker-a350/design-rules/: Shared .dru/.edru files for A350 workflows
+- machines/snapmaker-a350/cnc/design-rules/: CNC-focused .dru/.edru files
+- machines/snapmaker-a350/laser/design-rules/: Laser-focused .dru/.edru files
+- machines/snapmaker-a350/print-3d/design-rules/: 3D print-focused .dru/.edru files
 
 a360/scripts/
 
@@ -48,7 +48,7 @@ templates/
 4. Use the design review checklist before final release.
 5. Store wiring diagrams and standards in docs/electrical-wiring-diagrams.
 6. Use docs/machine-profiles/snapmaker-a350.md and a360/machines/snapmaker-a350/ for process setup and verification notes.
-7. Place Fusion .dru files in a360/machines/snapmaker-a350/design-rules/ or in the process-specific design-rules folders.
+7. Place Fusion .dru/.edru files in a360/machines/snapmaker-a350/design-rules/ or in the process-specific design-rules folders.
 
 ## Contribution Notes
 
