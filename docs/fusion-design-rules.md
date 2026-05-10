@@ -6,9 +6,10 @@ This document defines baseline mechanical CAD rules for Fusion models in this re
 
 ## Units And Precision
 
-- Use mm as the default model unit.
+- Use in as the default model unit.
 - Keep dimensions as parameters where practical.
 - Avoid unnecessary decimal precision in sketch dimensions.
+- If supplier or manufacturing requirements are metric, keep source dimensions in inches and add clearly named conversion parameters.
 
 ## Parameters
 
