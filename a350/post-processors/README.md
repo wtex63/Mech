@@ -1,4 +1,4 @@
-# A360 Post Processors
+# A350 Post Processors
 
 Store CAM post files and notes in this directory.
 

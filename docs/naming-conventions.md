@@ -35,7 +35,7 @@ Use stable names with role-first format:
 
 ## Script Naming
 
-In a360/scripts, use:
+In a350/scripts, use:
 
 - fusion-[purpose].py
 - fusion-[purpose]-test.py

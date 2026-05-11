@@ -10,11 +10,11 @@ This profile defines repository assumptions for your primary machine.
 
 ## Documentation Rules
 
-- Store machine-specific notes under a360/machines/snapmaker-a350/.
+- Store machine-specific notes under a350/machines/snapmaker-a350/.
 - Keep process setup notes in cnc/, laser/, and print-3d/.
 - Store Fusion design rule files (.dru/.edru) in design-rules/.
 - Use cnc/design-rules/, laser/design-rules/, and print-3d/design-rules/ for process-specific .dru/.edru variants.
-- Keep active profile notes in a360/machines/snapmaker-a350/design-rules/README.md.
+- Keep active profile notes in a350/machines/snapmaker-a350/design-rules/README.md.
 - Reference this profile from project-specific manufacturing notes.
 
 ## Validation Rule

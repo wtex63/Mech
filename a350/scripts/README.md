@@ -1,4 +1,4 @@
-# A360 Scripts
+# A350 Scripts
 
 Place Fusion scripts and add-ins here.
 
