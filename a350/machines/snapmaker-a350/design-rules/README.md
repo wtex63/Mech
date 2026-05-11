@@ -16,11 +16,15 @@ Examples:
 
 Use the process-specific folders when a rule file only applies to one workflow.
 
+
 ## Current Files
 
 - home_etch_rules.dru: Baseline home-etch rules.
-- home_etch_hand_drill.edru: Home-etch profile tuned for hand drilling.
-- snapmaker_a350_CNC.edru: A350 CNC profile for 0.5 oz copper on 0.032 in FR4.
+- home_etch_05oz_FR4.edru: Home Etch, General Purpose 0.5 oz FR-4. Single-sided, 10 mil clearances, 10 mil traces, 31 mil min drill. Mixed SMD and through-hole.
+- home_etch_hand_drill.edru: Home Etch, Hand Drill Conservative. Conservative clearances for hand drilling, 31 mil min drill, 0603/0805 SMD compatible.
+- home_etch_SMD_aggressive.edru: Home Etch, SMD Aggressive. Tight SMD clearances (5 mil SMD-to-SMD, 8 mil trace), 31 mil min drill, 0603/0805 optimized.
+- snapmaker_a350_CNC.edru: Snapmaker A350 CNC, Moderate. 12 mil min drill, 24 mil via pad, 0603/0805 SMD compatible.
+- snapmaker_a350_SMD_aggressive.edru: Snapmaker A350 CNC, SMD Aggressive. Tightest clearances (4 mil SMD-to-SMD, 8 mil trace), 12 mil min drill, 0603/0805 optimized.
 
 ## Active A350 CNC Profile Summary
 
