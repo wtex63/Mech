@@ -1,0 +1,133 @@
+XBee Project Wiring Diagram — DS18B20 Parasite Power with MOSFET Strong Pull-up
+===============================================================================
+Purpose
+-------
+Provide a corrected 1-Wire parasite-power wiring for the XBee project using a
+P-channel MOSFET strong pull-up (instead of BC847 emitter follower), including:
+1) New schematic wiring for next PCB revision
+2) Rework guidance for already-manufactured PCBs
+
+Recommended MOSFET
+------------------
+Primary recommendation: AO3401A (P-channel MOSFET, SOT-23)
+Alternatives: BSS84, SI2301CDS, IRLML6402 (all P-channel SOT-23 class)
+
+Important: Always verify Source/Drain/Gate pinout from your exact vendor datasheet.
+Different manufacturers can swap S/D assignment for similarly named parts.
+
+
+A) NEW SCHEMATIC WIRING (for PCB revision)
+==========================================
+Power assumptions:
+- Battery: 2 x 1.5V rechargeable lithium cells
+- Regulator: XC9140
+- XBee rail: typically 3.3V (use your configured VOUT)
+
+DS18B20 parasite requirements:
+- Pin 1 (GND) -> GND
+- Pin 2 (DQ)  -> 1-Wire bus node
+- Pin 3 (VDD) -> GND  (do NOT leave NC)
+
+1-Wire bus and strong pull-up topology:
+
+   VCC_XBEE (from XC9140) -----+-----------------------------+
+                               |                             |
+                            RPU 4.7k                      AO3401A
+                               |                        (P-MOSFET)
+                               +---- DQ_BUS ------------- DRAIN
+                               |                             SOURCE ---- VCC_XBEE
+                               |                             GATE
+                               |                               |
+DS18B20 pin2 DQ ---------------+                               +---- RG 100 ohm ---- XBee GPIO_STRONG
+DS18B20 pin1 GND -------------- GND                            |
+DS18B20 pin3 VDD -------------- GND                            +---- RGP 100k ---- VCC_XBEE
+
+Recommended values:
+- RPU  = 4.7k (DQ to VCC_XBEE)
+- RG   = 100 ohm (gate series, optional but recommended)
+- RGP  = 100k (gate pull-up to VCC_XBEE)
+
+Logic behavior (with P-MOSFET high-side switch):
+- GPIO_STRONG = LOW  -> MOSFET ON  -> strong pull-up active
+- GPIO_STRONG = HIGH -> MOSFET OFF -> only 4.7k weak pull-up active
+
+Why this fixes the BC847 issue:
+- BC847 emitter follower gives DQ ~= VCC - 0.7V during Convert T
+- At 3.3V rail, DQ ~= 2.6V (too low margin for parasite conversion)
+- P-MOSFET passes near-full VCC to DQ (no Vbe drop)
+
+
+B) REWORK PLAN FOR ALREADY-MANUFACTURED PCBS
+=============================================
+Goal: Keep as much of existing board as possible while replacing BC847 function.
+
+Pre-checks
+----------
+1) Confirm DS18B20 pin 3 is tied to GND. If currently NC, add bodge wire to GND.
+2) Identify these existing nets on PCB:
+   - VCC_XBEE
+   - DQ_BUS
+   - STRONG_CTRL (old BC847 base control net)
+3) Remove BC847 or isolate it so it cannot drive DQ.
+
+Practical rework wiring (dead-bug SOT-23 MOSFET)
+-------------------------------------------------
+- AO3401A SOURCE -> VCC_XBEE (short enamel wire)
+- AO3401A DRAIN  -> DQ_BUS
+- AO3401A GATE   -> STRONG_CTRL via 100 ohm series resistor
+- Add 100k resistor from AO3401A GATE to VCC_XBEE
+
+If old BC847 base resistor is present:
+- You may reuse the STRONG_CTRL net through the existing resistor
+  if value is near 100 ohm to a few hundred ohm. Otherwise bodge a 100 ohm.
+
+If old BC847 collector/emitter traces cannot be fully isolated:
+- Cut BC847 emitter path to DQ and collector path to VCC if necessary.
+- Verify with DMM continuity that only MOSFET connects VCC_XBEE to DQ during ON.
+
+
+C) FIRMWARE CONTROL NOTE
+========================
+Control polarity changes versus BC847 implementation:
+- Old (BC847 follower): HIGH often enabled strong pull-up
+- New (P-MOS high-side): LOW enables strong pull-up
+
+So your strong-pull-up GPIO logic must be inverted.
+
+Safe startup default:
+- Configure GPIO_STRONG as OUTPUT HIGH before 1-Wire init
+  (keeps MOSFET OFF until explicitly needed)
+
+
+D) QUICK VALIDATION CHECKLIST (AFTER REWORK)
+=============================================
+DMM checks (power OFF)
+----------------------
+1) DS18B20 pin3 -> GND continuity: YES
+2) DQ_BUS -> VCC_XBEE via 4.7k: YES
+3) AO3401A gate -> VCC_XBEE via 100k: YES
+4) No hard short VCC_XBEE <-> GND: YES
+
+Scope checks (power ON)
+-----------------------
+1) Idle DQ level ~= VCC_XBEE
+2) 1-Wire reset pulses and presence pulses look normal
+3) During Convert T strong pull-up window, DQ remains near VCC_XBEE (not VCC-0.7)
+
+Functional checks
+-----------------
+1) Repeated Convert T + Read Scratchpad returns CRC=OK
+2) No intermittent temp = 85.0C stuck value under normal ambient conditions
+3) Stable operation over low battery range expected in deployment
+
+
+E) NOTES FOR SCHEMATIC UPDATE
+=============================
+Replace BC847 block with:
+- AO3401A P-MOS high-side switch as shown above
+- 100k gate pull-up to VCC_XBEE
+- 100 ohm gate series from GPIO_STRONG
+- Explicit DS18B20 pin3 (VDD) to GND note: "Parasite power mode"
+
+Optional annotation to add:
+"GPIO_STRONG is active LOW"

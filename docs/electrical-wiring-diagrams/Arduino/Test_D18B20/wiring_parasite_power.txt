@@ -1,0 +1,257 @@
+DS18B20 Parasite Power — Breadboard Wiring for Arduino UNO
+============================================================
+Sketch pins: ONE_WIRE_BUS_PIN = 2,  ONE_WIRE_PULLUP_PIN = 3
+
+In parasite power mode the DS18B20 draws its operating current
+from the DQ line.  VDD is tied to GND.  The bus master must
+provide a strong (low-impedance) pull-up during the 750 ms
+Convert T period; Pin D3 does that job in the sketch.
+
+This breadboard test was designed to validate the DS18B20 as used
+in the Door Position Sensor XBee project (BC847 + XBee-PRO + XC9140
+boost converter on 2 x 1.5V rechargeable lithium cells).  See
+XBEE SCHEMATIC COMPARISON below.
+
+
+SCHEMATIC
+---------
+
+  Arduino UNO
+  ┌──────────┐
+  │       5V ├──────────────────┬──────────────────┐
+  │          │                  │                  │
+  │          │                R1 4.7 kΩ       R2 470 Ω
+  │          │                  │                  │
+  │       D2 ├──────────────────┴──────────────────┤──── DQ  ─── DS18B20 pin 2
+  │          │                                      │
+  │       D3 ├──────────────────────────────────────┘
+  │          │     (strong pull-up during Convert T)
+  │          │
+  │      GND ├──────────────────┬───────── DS18B20 pin 1 (GND)
+  │          │                  └───────── DS18B20 pin 3 (VDD) ← tied to GND = parasite
+  └──────────┘
+
+
+HOW IT WORKS
+  R1 (4.7 kΩ): Weak idle pull-up on DQ. Always present.
+               Provides bus idle HIGH and all normal read/write bit timing.
+
+  R2 (470 Ω):  Current-limiting resistor between D3 and DQ.
+               D3 is driven HIGH by DallasTemperature during Convert T,
+               supplying ~10 mA to charge the DS18B20's internal capacitor.
+               The 470 Ω limits current to safe UNO pin level (~10 mA @ 5V).
+
+  DS18B20 VDD → GND: Puts the sensor in parasite power mode.
+               The sensor draws up to 1.5 mA quiescent, up to 1.5 mA
+               during conversion — all from the DQ line charge reservoir.
+
+
+BREADBOARD LAYOUT
+-----------------
+Using a standard 400-point breadboard.
+Power rails: top = 5V (red), bottom = GND (blue).
+
+  Column:    a  b  c  d  e     f  g  h  i  j
+           ┌──────────────────────────────────────┐
+   row  1  │ +5V rail (red)                       │
+           │                                      │
+   row  5  │       [R1 4.7kΩ]                     │
+           │        e5 ──── e10                   │
+   row  5  │        e5 tied to +5V rail            │
+   row 10  │        e10 = DQ node                 │
+           │                                      │
+   row 10  │       [R2 470Ω]                      │
+           │        g10 ──── g15                  │
+   row 15  │        g15 → jumper to Arduino D3    │
+           │                                      │
+   row 10  │        j10 → jumper to Arduino D2    │
+           │                                      │
+   row 20  │ ┌──────────────┐                     │
+           │ │  DS18B20     │  (flat side facing up│
+           │ │  TO-92       │   left→right = 1,2,3)│
+           │ │ pin1 pin2 pin3                      │
+           │ │  c20  d20  e20                      │
+           │ └──────────────┘                      │
+           │                                      │
+   row 20  │  c20 (GND) → GND rail               │
+   row 20  │  d20 (DQ)  → DQ node (row 10, col e) │
+   row 20  │  e20 (VDD) → GND rail  ← parasite!  │
+           │                                      │
+   row 30  │ GND rail (blue)                      │
+           └──────────────────────────────────────┘
+
+
+WIRE LIST (use jumper wires)
+-----------------------------
+  Arduino 5V  ──► breadboard +5V rail
+  Arduino GND ──► breadboard GND rail
+  Arduino D2  ──► DQ node (one leg of R1, one leg of R2, DS18B20 pin 2)
+  Arduino D3  ──► one leg of R2 (other leg of R2 goes to DQ node)
+  R1 other leg ──► +5V rail
+  DS18B20 pin 1 (GND) ──► GND rail
+  DS18B20 pin 2 (DQ)  ──► DQ node
+  DS18B20 pin 3 (VDD) ──► GND rail       ← this is the parasite connection
+
+
+DS18B20 TO-92 PINOUT (holding flat side toward you)
+----------------------------------------------------
+      Flat side
+      ┌──────┐
+      │      │
+      │      │
+      └─┬─┬─┘
+        │ │ │
+       GND DQ VDD
+       (1) (2) (3)
+
+
+NOTES FOR SCOPE CAPTURE
+-----------------------
+- Probe CH1 on the DQ node (junction of R1, R2, and DS18B20 pin 2).
+- With parasite power, scope GND = Arduino GND (do NOT float scope GND).
+- During Convert T: D3 drives HIGH through R2, so DQ stays firmly at 5V
+  — the SDS1204X-E should show the DQ line held high for ~750 ms.
+  This is the key difference from normal power mode to verify on scope.
+- Bus idles HIGH via R1 only; D3 is left as INPUT by the library outside
+  Convert T periods to avoid bus contention during reads.
+- Expected DQ voltage levels: HIGH ≈ 4.8–5V, LOW ≈ 0–0.3V.
+
+
+PARTS NEEDED
+------------
+  1 × DS18B20 (TO-92 package)
+  1 × 4.7 kΩ resistor  (R1, yellow-violet-red or yellow-violet-black-brown)
+  1 × 470 Ω resistor   (R2, yellow-violet-brown or yellow-violet-black-black)
+  1 × 400-point breadboard
+  5 × jumper wires (M-M for breadboard ↔ UNO headers)
+  1 × Arduino UNO + USB cable
+
+
+XBEE SCHEMATIC COMPARISON
+==========================
+The XBee Door Position Sensor schematic differs from this UNO breadboard
+in four ways. All four are explained below with test validity assessment.
+
+┌─────────────────────┬───────────────────────────┬───────────────────────────┐
+│ Aspect              │ XBee Schematic            │ UNO Breadboard Test       │
+├─────────────────────┼───────────────────────────┼───────────────────────────┤
+│ DS18B20 VDD (pin 3) │ NC (not connected)        │ Tied to GND               │
+│ Strong pull-up      │ BC847 NPN transistor      │ D3 + 470 Ω to DQ          │
+│ Idle pull-up        │ 4.7 kΩ to VCC             │ 4.7 kΩ to 5V  (R1)       │
+│ Supply voltage      │ ~3.3V (XC9140 from NiMH)  │ 5V (USB)                  │
+└─────────────────────┴───────────────────────────┴───────────────────────────┘
+
+
+DIFFERENCE 1 — DS18B20 VDD (pin 3): NC vs GND
+----------------------------------------------
+XBee schematic: pin 3 marked NC (not connected).
+UNO breadboard: pin 3 tied to GND.
+
+The DS18B20 datasheet (section 5.1) explicitly states:
+  "For parasite power operation, connect VDD to GND."
+An NC on VDD leaves the pin floating; the internal Schottky diode from DQ
+still charges the internal capacitor, so it often works in practice, but
+is not compliant with the datasheet and may cause instability at marginal
+supply current (long cable, high conversion rate).
+
+▶ ACTION: In the XBee schematic, change DS18B20 pin 3 from NC to GND.
+  The UNO breadboard test (VDD → GND) is the CORRECT configuration.
+  Use this test to confirm stable reads before respinning the XBee PCB.
+
+
+DIFFERENCE 2 — Strong Pull-up: BC847 Emitter Follower vs MOSFET Switch
+------------------------------------------------------------------------
+XBee schematic uses a BC847 NPN transistor as an emitter follower:
+  Collector → VCC
+  Base      → XBee GPIO (driven HIGH during Convert T)
+  Emitter   → DQ line
+
+When the XBee drives the base HIGH, the emitter follows to VCC − Vbe.
+At 3.3V supply: strong pull-up voltage = 3.3 − 0.7 ≈ 2.6V.
+This is below the DS18B20 minimum VDD (3.0V per datasheet) — MARGINAL.
+
+  ⚠ The 2.6V emitter voltage during conversion may be insufficient.
+    The DS18B20 needs ≥ 3.0V on DQ during Convert T in parasite mode.
+    Replace BC847 with a P-channel MOSFET high-side switch, which gives
+    full VCC on DQ when turned on and has no Vbe drop.
+
+UNO breadboard: D3 driven HIGH → 470 Ω → DQ.
+  Strong pull-up voltage ≈ 5V − (1mA × 470Ω) ≈ 4.5V. No Vbe drop.
+  This is equivalent to a P-channel MOSFET strong pull-up.
+
+▶ The UNO test at 5V accurately tests the Convert T strong pull-up
+  BEHAVIOUR (timing, bus hold, current delivery), but at a higher voltage
+  than the XBee circuit. Both are functionally valid for bus protocol
+  testing; the XBee margin issue will only show up in the real hardware.
+
+
+RECOMMENDED MOSFET (MINIMAL-CHANGE OPTION)
+------------------------------------------
+Recommended part: AO3401A (P-channel MOSFET, SOT-23)
+  - VDS max: 30V
+  - Low RDS(on) at VGS = -2.5V / -4.5V
+  - More than enough current headroom for DS18B20 parasite conversion pulse
+
+Recommended strong-pullup topology:
+  Source → VCC (XC9140 output rail)
+  Drain  → 1-Wire DQ node
+  Gate   → XBee control pin through 100Ω (optional but recommended)
+  Gate pull-up → 100kΩ to VCC
+
+Logic behaviour with this topology:
+  Gate LOW  → MOSFET ON  (strong pull-up active)
+  Gate HIGH → MOSFET OFF (normal 4.7k pull-up only)
+
+Minimal firmware impact:
+  Invert strong-pullup control polarity vs BC847 implementation
+  (old: HIGH = strong pull-up, new: LOW = strong pull-up).
+
+Minimal PCB impact:
+  If you have not fabricated yet: reroute directly to the topology above.
+  If board is already fabricated for BC847, keep the same control net and
+  patch Source/Drain/Gate with a short bodge wire adapter as needed.
+  Always verify package pinout before assembly (AO3401A pinout is vendor-
+  specific; confirm against your chosen manufacturer datasheet).
+
+
+DIFFERENCE 3 — Supply Voltage: 5V vs XC9140-regulated XBee rail
+-------------------------------------------
+XBee circuit: XC9140 boost converter from 2 x 1.5V rechargeable lithium cells
+→ regulated XBee rail (commonly configured to 3.3V for XBee-PRO).
+UNO test: 5V USB.
+
+DS18B20 operates from 3.0V to 5.5V — both voltages are valid.
+1-Wire timing (reset, bit slots, conversion wait) is not voltage-dependent.
+
+▶ Bus protocol behaviour, Convert T timing, and Read Scratchpad CRC are
+  fully representative at 5V. Scope voltage thresholds will differ:
+    UNO test:    HIGH ≈ 4.8V,  LOW ≈ 0–0.3V
+    XBee target: HIGH depends on XC9140 output and strong pull-up topology.
+                 With BC847 emitter follower, HIGH during strong pull-up is
+                 approximately VCC - 0.7V.
+  Adjust SDS1204X-E trigger threshold accordingly for each setup.
+
+
+DIFFERENCE 4 — Bus Master: Arduino D2 vs XBee DIO pin
+------------------------------------------------------
+XBee schematic: DQ connects to an XBee-PRO DIO pin.
+  The XBee handles 1-Wire via its firmware/AT commands or a host MCU
+  through the UART API talking to the XBee.
+UNO test: DQ on D2, strong pull-up on D3. Host MCU drives the bus directly.
+
+▶ The UNO test validates the DS18B20 sensor, pull-up network, and parasite
+  power wiring in isolation from the XBee firmware. This is the correct
+  first step — confirm the sensor works before integrating with the XBee.
+
+
+TEST VALIDITY SUMMARY
+---------------------
+  ✓ Parasite power operation         — Valid. Wiring is correct (pin 3 → GND).
+  ✓ 1-Wire bus timing (all bit slots) — Valid. Timing is voltage-independent.
+  ✓ Convert T strong pull-up hold    — Valid at 5V; XBee margin at 2.6V is a
+                                       separate concern to verify on real HW.
+  ✓ Read Scratchpad + CRC            — Valid. PULSE_TEST_MODE in sketch tests
+                                       this explicitly for every cycle.
+  ⚠ VDD NC in XBee schematic        — Flag for correction. UNO test is better.
+  ⚠ BC847 Vbe drop at 3.3V          — Replace with AO3401A P-MOSFET strong
+                                       pull-up to avoid undervoltage on DQ.
