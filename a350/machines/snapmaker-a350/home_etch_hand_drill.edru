@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eagle SYSTEM "eagle.dtd">
+<eagle version="9.7.0">
+<designrules name="home_etch_hand_drill">
+<description language="en">&lt;b&gt;Home Etch — Hand Drill Conservative&lt;/b&gt;&lt;p&gt;
+Single-sided FR-4 0.032 in / 0.5 oz copper.
+Conservative clearances for hand drilling.
+Min drill 31 mil, via pad 55 mil.
+0603/0805 SMD compatible.&lt;/p&gt;</description>
+<param name="layerSetup" value="(1*16)"/>
+<param name="mtCopper" value="0.5mil 0.5mil"/>
+<param name="mtIsolate" value="32mil 32mil"/>
+<param name="mdWireWire" value="12mil"/>
+<param name="mdWirePad" value="12mil"/>
+<param name="mdWireVia" value="12mil"/>
+<param name="mdPadPad" value="12mil"/>
+<param name="mdPadVia" value="12mil"/>
+<param name="mdViaVia" value="12mil"/>
+<param name="mdSmdPad" value="12mil"/>
+<param name="mdSmdVia" value="12mil"/>
+<param name="mdSmdSmd" value="8mil"/>
+<param name="mdConnectorInComponent" value="0mil"/>
+<param name="mdPadToSmd" value="12mil"/>
+<param name="mnLayersVia" value="2"/>
+<param name="mnLayersPad" value="2"/>
+<param name="msWidth" value="12mil"/>
+<param name="msDrill" value="31mil"/>
+<param name="msMicroVia" value="9.99mil"/>
+<param name="msBlindViaRatio" value="0.5"/>
+<param name="rvPadTop" value="0.25"/>
+<param name="rvPadBottom" value="0.25"/>
+<param name="rvPadInner" value="0.25"/>
+<param name="rvViaOuter" value="0.25"/>
+<param name="rvViaInner" value="0.25"/>
+<param name="rvMicroViaOuter" value="0.25"/>
+<param name="rvMicroViaInner" value="0.25"/>
+<param name="rlMinPadTop" value="8mil"/>
+<param name="rlMaxPadTop" value="0mil"/>
+<param name="rlMinPadBottom" value="8mil"/>
+<param name="rlMaxPadBottom" value="0mil"/>
+<param name="rlMinPadInner" value="8mil"/>
+<param name="rlMaxPadInner" value="0mil"/>
+<param name="rlMinViaOuter" value="12mil"/>
+<param name="rlMaxViaOuter" value="0mil"/>
+<param name="rlMinViaInner" value="8mil"/>
+<param name="rlMaxViaInner" value="0mil"/>
+<param name="rlMinMicroViaOuter" value="4mil"/>
+<param name="rlMinMicroViaInner" value="4mil"/>
+<param name="slThermalIsolate" value="10mil"/>
+<param name="slThermalsForVias" value="0"/>
+<param name="slMaxViaInThermal" value="0mil"/>
+<param name="slMinSectorsInThermal" value="0"/>
+<param name="slMaxSectorsInThermal" value="0"/>
+<param name="donutsMinWidth" value="10mil"/>
+<param name="srRoundness" value="0"/>
+<param name="srMinRoundness" value="0mil"/>
+<param name="mlMinCreamFrame" value="-1mil"/>
+<param name="mlMaxCreamFrame" value="-1mil"/>
+<param name="mlMinStopFrame" value="2mil"/>
+<param name="mlMaxStopFrame" value="3mil"/>
+<param name="mlViaStopLimit" value="0mil"/>
+<param name="mlMinDrill" value="31mil"/>
+<param name="mlMaxDrill" value="0mil"/>
+<param name="mvStopFrame" value="1"/>
+<param name="mvCreamFrame" value="0"/>
+<param name="mvDrillLayers" value="1"/>
+<param name="mvRelativeWidthGnd" value="0.4"/>
+<param name="mvRelativeWidthPwr" value="0.4"/>
+<param name="clrName1" value="Signal"/>
+<param name="clrBoard1" value="12mil"/>
+<param name="clrOther1" value="12mil"/>
+<param name="clrName2" value="GND"/>
+<param name="clrBoard2" value="12mil"/>
+<param name="clrOther2" value="12mil"/>
+<param name="clrName3" value="PWR"/>
+<param name="clrBoard3" value="12mil"/>
+<param name="clrOther3" value="12mil"/>
+<param name="clrName4" value=""/>
+<param name="clrBoard4" value="12mil"/>
+<param name="clrOther4" value="12mil"/>
+<layerstackup>
+<layer name="Top" number="1" copper="0.5" isolate="32" pourable="yes"/>
+<layer name="Bottom" number="16" copper="0.5" isolate="0" pourable="no"/>
+</layerstackup>
+</designrules>
+</eagle>
