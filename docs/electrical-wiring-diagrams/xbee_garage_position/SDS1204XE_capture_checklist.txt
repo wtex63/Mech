@@ -1,0 +1,90 @@
+SDS1204X-E Capture Checklist — DS18B20 1-Wire Bus
+====================================================
+Firmware: CodeWarrior ds18b20_hubitat_temp
+Target: Stage 3 XBee run (Convert T + FC00 payload cycle)
+
+
+HARDWARE SETUP
+--------------
+CH1  : 1-Wire DQ bus (XPIN11 net)
+CH2  : PMOS gate control (XPIN12 side through gate resistor)
+GND  : Common DUT ground
+Probe: 10x recommended for general validation, 1x optional for fine pulse-shape debug
+Bus pull-up: 4.7 kΩ to 3.3V_S
+
+
+TRIGGER SETTINGS — RESET PULSE
+--------------------------------
+Purpose  : Catch the bus master reset at the start of each transaction.
+Mode     : Edge, Falling
+Source   : CH1 (DQ)
+Threshold: ~1.2 V (3.3V bus)
+Holdoff  : 900 ms (prevents re-trigger during the 750 ms conversion wait)
+Coupling : DC
+
+Time/div : 200 µs/div
+Timebase : Position trigger ~10% from left edge
+           → shows 1.4 ms window, fits reset (480 µs) + presence (240 µs)
+
+
+KEY 1-WIRE TIMING VALUES (DS18B20, 12-bit)
+-------------------------------------------
+Reset low pulse (master)   : 480 µs min
+Master release → wait      : 15–60 µs
+Presence pulse (sensor low): 60–240 µs
+Write-1 slot (master low)  : 1–15 µs
+Write-0 slot (master low)  : 60–120 µs
+Read slot (master low)     : 1–15 µs, then sensor drives 0 or releases to 1
+Bit slot total             : 60–120 µs
+Convert T (0x44) duration  : ≤ 750 ms at 12-bit resolution (hardcoded in sketch)
+
+Strong pull-up gate behavior (current firmware):
+- Gate asserted LOW during strong pull-up window (PMOS ON)
+- Gate returns HIGH after conversion window (PMOS OFF)
+
+
+TRANSACTION SEQUENCE TO CAPTURE (XBee STAGE 3)
+-----------------------------------------------
+1. Trigger cycle by Hubitat Refresh (FC00 poll) or by door-state transition.
+2. Firmware receives poll/trigger and queues sensor read.
+3. DQ shows 1-Wire reset/presence/command slots.
+4. Gate goes LOW during the conversion support window.
+5. DQ remains near rail during strong pull-up interval.
+6. Firmware prints `FC00 TX: ...` payload after acquisition.
+
+Use serial output as timing marker:
+- Start marker: `FC00 cmd=0x01 (poll) -> queuing temp read`
+- End marker: `FC00 TX: TEMP_C=...`
+
+
+ZOOM CAPTURE — INDIVIDUAL BIT SLOTS
+--------------------------------------
+Time/div : 10 µs/div
+Trigger  : same falling-edge setup above
+Purpose  : Verify write-1 vs write-0 pulse widths and read-slot release timing
+
+
+CAPTURE — FULL CONVERT-T WINDOW + PAYLOAD EDGE
+----------------------------------------------
+Time/div : 2 ms/div for pulse detail
+Time/div : 100 ms/div to view macro timing around conversion and report
+Better   : Segment/sequence capture or roll mode
+           Menu → Acquire → Sequence  (set depth for 2+ captures)
+           Capture 1: Reset/presence + command slots on DQ
+           Capture 2: Gate low window + DQ hold behavior
+           Capture 3: Final DQ traffic before FC00 TX print marker
+
+
+DECODE (PROTOCOL ANALYZER)
+--------------------------
+SDS1204X-E does not have native 1-Wire decode.
+Use cursor measurements + the bit timing table above to decode manually, OR
+export raw CSV (Menu → Storage → CSV) and decode with sigrok/PulseView:
+  - Add "1-Wire" protocol decoder in PulseView
+  - Set sample rate ≥ 1 MS/s (scope max export rate: check Storage → CSV settings)
+
+
+EXPECTED SERIAL OUTPUT MARKERS (115200 baud)
+--------------------------------------------
+FC00 cmd=0x01 (poll) -> queuing temp read
+FC00 TX: TEMP_C=24.62,DOOR=closed,VBAT_MV=3910,BATT_PCT=92

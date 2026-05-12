@@ -1,0 +1,132 @@
+XBee Project Wiring - DS18B20 Parasite Power with MOSFET Strong Pull-up
+=======================================================================
+VERSION 3 - 3xAAA NiMH + MCP1700 always-on + XC6220A gated sensor rail
+Generated from Door Position Sensor schematic (XBP24-ZB, profile 23A7-S2B)
+
+Confirmed pin assignments:
+- DQ data line: XPIN11 = DIO4/PTB3/MOSI1
+- Strong pull-up gate control: XPIN12 = DIO3/AD3/PTB1/MISO1
+- Tilt IRQ input: XPIN7 = DIO11/PWM1/PTA2/SDA
+- Sensor-rail gate control: XPIN13 = ON/SLEEP/PTA1 -> XC6220A CE/EN
+
+
+PIN TABLE - XBee-PRO (XBP24-ZB) 20-pin connector
+--------------------------------------------------
+Pin  Schematic signal label
+ 1   VCC
+ 7   DIO11/PWM1/PTA2/SDA (tilt IRQ)
+10   GND
+11   DIO4/PTB3/MOSI1    (DQ)
+12   DIO3/AD3/PTB1/MISO1 (strong pull-up gate)
+13   ON/SLEEP/PTA1      (U2 CE/EN control)
+14   VREF
+15   ASSOC/DIO5/PTD4
+18   DIO2/ADC2/PTB2/SPSCK (battery ADC)
+20   DIO0/ADC0/PTA0     (commissioning)
+
+
+A) POWER ARCHITECTURE (UPDATED)
+================================
+Power assumptions:
+- Battery:    3 x AAA NiMH rechargeable (about 4.2V fresh to about 3.0V)
+- U1:         MCP1700-3302 (always-on XBee rail)
+- U2:         XC6220A331MR-G (gated sensor rail using CE/EN)
+- XBee rail:  VCC (pin 1) = 3.3V_A always-on
+
+Always-on rail:
+- 3xAAA(+) -> U1 VIN
+- U1 VOUT  -> 3.3V_A -> XBee pin1 (VCC), pin14 (VREF), RPU source
+
+Gated sensor rail:
+- 3xAAA(+) -> U2 VIN
+- U2 VOUT  -> 3.3V_S -> PMOS source (strong pull-up supply)
+- XPIN13   -> R4 1k -> U2 CE/EN
+- U2 CE/EN -> R3 100k -> GND (default OFF)
+
+State behavior:
+- XPIN13 HIGH (awake) -> U2 ON  -> 3.3V_S active
+- XPIN13 LOW  (sleep) -> U2 OFF -> 3.3V_S off
+
+
+B) 1-WIRE BUS + STRONG PULL-UP
+===============================
+DS18B20 parasite correction remains mandatory:
+- DS1 pin1 (GND) -> GND
+- DS1 pin2 (DQ)  -> DQ net
+- DS1 pin3 (VDD) -> GND
+
+Topology:
+- RPU 4.7k from 3.3V_S to DQ
+- PMOS source to 3.3V_S
+- PMOS drain to DQ
+- PMOS gate to XPIN12 via RG (100 to 180 ohm)
+- PMOS gate bias resistor per board convention (keep existing validated topology)
+
+Control polarity:
+- XPIN12 LOW  -> PMOS ON  -> strong pull-up active during Convert T
+- XPIN12 HIGH -> PMOS OFF -> weak pull-up only
+
+
+C) FIRMWARE CONTROL (XBee API / AT)
+===================================
+Strong pull-up sequence:
+1) Assert XPIN12 LOW -> PMOS ON
+2) Issue Convert T (0x44)
+3) Wait 750 ms
+4) Deassert XPIN12 HIGH -> PMOS OFF
+5) Read scratchpad (0xBE)
+
+Sensor-rail gating:
+- XPIN13 is managed by XBee sleep state.
+- Ensure CE/EN sees valid HIGH when awake and LOW when asleep.
+
+Safe defaults:
+- XPIN12 default HIGH at boot (PMOS OFF)
+- CE/EN pull-down (R3) keeps U2 OFF if XPIN13 floats during startup
+
+
+D) VALIDATION CHECKLIST (UPDATED)
+=================================
+
+  Check                                              Expected     Pass/Fail
+  -------------------------------------------------------------------------
+  U1 output (3.3V_A) present at all times             ~3.3V       [ ]
+  U2 output (3.3V_S) follows XPIN13 state             ON/OFF      [ ]
+  DS1 pin3 -> GND continuity                           Shorted     [ ]
+  DQ -> 3.3V_S via 4.7k                                ~4.7k ohm   [ ]
+  Idle DQ level                                        ~3.3V       [ ]
+  DQ during strong pull-up window                      >=3.0V      [ ]
+  Repeated Convert T and read CRC                      CRC OK      [ ]
+  Sleep current with U2 OFF meets target               Low uA      [ ]
+
+
+E) CHANGE LOG FROM PRIOR REVISION
+=================================
+- Replaced XC9140 boosted gated rail with XC6220A331MR-G gated LDO rail.
+- Updated battery source from 2xAA to 3xAAA NiMH.
+- Retained MCP1700 always-on XBee rail.
+- Retained DS18B20 parasite + PMOS strong pull-up topology.
+- Added explicit XPIN13 -> CE/EN control guidance for U2.
+
+
+F) FITTED VALUES SNAPSHOT (LATEST SPICE EXPORT + TEST OVERRIDE)
+================================================================
+- R1 = 82k
+- R2 = 220k
+- R3 = 100k
+- R4 = 1k
+- R5 = 1k
+- R6 = 1M
+- R7 = 4.7k
+- R8 = 100k
+- R9 = 100
+- R10 = 330
+- R11 = 10k
+- C1 = 10uF
+- C2 = 10uF
+- C3 = 10uF
+- C4 = 100nF (X7R, test build override)
+- C5 = 100nF
+- C6 = 0.1uF
+
+
